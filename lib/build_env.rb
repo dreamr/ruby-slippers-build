@@ -37,9 +37,9 @@ module RubySlippers
       def release!
         bad_return("Must be a new release, gem not released!") unless is_new_release?
         bad_return("Try a few more bigfixes or a patch, gem not released!") if too_many_releases?
-
-        release_output = `cd #{ENGINE_ROOT} && git add . && git commit -m 'releasing new gem' && rake gem:release`
-        puts release_output
+        bad_return("The gem could not be published!") unless gem_publishes?
+        
+        print yellow, bold, "Gem v#{new_version} pushed to rubygems.org!", reset, "\n"
         
         log_release("Last released v#{build_version.join(".")} #{timestamp}")
       end
@@ -89,6 +89,12 @@ module RubySlippers
         end
         print green, bold, "All base integration tests passed!", reset, "\n"
         true
+      end
+      
+      def gem_publishes?
+        release_output = `cd #{ENGINE_ROOT} && git add . && git commit -m 'releasing new gem' && rake gem:release`
+        return true if release_output =~ /Successfully registered gem/
+        false
       end
 
       def gem_builds?

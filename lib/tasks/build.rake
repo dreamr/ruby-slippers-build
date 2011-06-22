@@ -13,5 +13,6 @@ require "./lib/build_env"
 # => writes to buildfile with version so we know we cant release
 
 namespace :build do
-  RubySlippers::BuildEnv::Tasks.new.build!
+  tasks = RubySlippers::BuildEnv::Tasks.new
+  tasks.build!
 end

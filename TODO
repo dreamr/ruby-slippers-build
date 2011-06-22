@@ -9,5 +9,5 @@ Implement full stack test/deployment scheme
   [*] Integration Tests
 
 * Staged (deployed)
-  [ ] Integration Tests
+  [*] Integration Tests
   [ ] Client Rake Tests

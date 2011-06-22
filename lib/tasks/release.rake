@@ -9,5 +9,6 @@ require "./lib/build_env"
 
 desc "Tags and pushes to rubygems and gitub (no push or tag on fail)"
 task :release do
-  RubySlippers::BuildEnv::Tasks.new.release!
+  tasks = RubySlippers::BuildEnv::Tasks.new
+  tasks.release!
 end

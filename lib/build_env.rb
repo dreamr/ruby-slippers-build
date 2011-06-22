@@ -118,6 +118,7 @@ module RubySlippers
         when "bugfix"
           versions[BUGFIX]=versions[BUGFIX].to_i+1
         when "patch"
+          versions[BUGFIX]=0
           versions[PATCH]=versions[PATCH].to_i+1
           versions[RELEASE]=0
         when "release"
@@ -150,8 +151,9 @@ module RubySlippers
         build_version[BUGFIX] != release_version[BUGFIX]
       end
 
-      # is the release version more then 3 bugfixes behind?
       def too_many_releases?
+        return false if build_version[RELEASE] != release_version[RELEASE]
+        return false if build_version[PATCH] != release_version[PATCH]
         build_version[BUGFIX].to_i < release_version[BUGFIX].to_i+3
       end
       

@@ -39,7 +39,7 @@ module RubySlippers
         bad_return("Try a few more bigfixes or a patch, gem not released!") if too_many_releases?
         bad_return("The gem could not be published!") unless gem_publishes?
         
-        print yellow, bold, "Gem v#{new_version} pushed to rubygems.org!", reset, "\n"
+        print yellow, bold, "Gem v#{build_version.join(".")} pushed to rubygems.org!", reset, "\n"
         
         log_release("Last released v#{build_version.join(".")} #{timestamp}")
       end

@@ -2,7 +2,12 @@ TODO
 ====
 
 Implement full stack test/deployment scheme
-  [*] Unit Test Engine
-  [*] Functional Test Engine
-  [ ] Integration Test Front End
-  [ ] Test all client Rake tasks
+-------------------------------------------
+
+* Engine
+  [*] Unit Tests
+  [*] Integration Tests
+
+* Staged (deployed)
+  [ ] Integration Tests
+  [ ] Client Rake Tests

@@ -8,6 +8,7 @@ module RubySlippers
   module BuildEnv
     
     ENGINE_ROOT     = File.expand_path("../../engine", __FILE__)
+    BASE_ROOT       = File.expand_path("../../base", __FILE__)
     STD_TEST_ERROR  = "Rerun your test suite before you continue"
 
     BUGFIX = 2
@@ -26,6 +27,7 @@ module RubySlippers
           task "#{type}".to_sym do
             bad_return("Gem not built!") unless engine_unit_tests_pass?
             bad_return("Gem not built!") unless engine_integration_tests_pass?
+            bad_return("Gem not built!") unless base_integration_tests_pass?
             bad_return("Gem not built!") unless gem_builds?
             increment_version(type, File.open(ENGINE_ROOT+"/VERSION").read)
           end
@@ -70,12 +72,23 @@ module RubySlippers
           print yellow, bold, "Running engine #{type} tests...", reset, "\n"
           test_output = `cd #{ENGINE_ROOT} && rake test:#{type}`
           unless pass?(test_output)
-            print red, bold, "#{type} test failed! #{STD_TEST_ERROR}", reset, "\n"
+            print red, bold, "Engine #{type} test failed! #{STD_TEST_ERROR}", reset, "\n"
             return false
           end
-          print green, bold, "All #{type} tests passed!", reset, "\n"
+          print green, bold, "All engine #{type} tests passed!", reset, "\n"
           true
         end
+      end
+      
+      def base_integration_tests_pass?
+        print yellow, bold, "Running base integration tests...", reset, "\n"
+        test_output = `cd #{BASE_ROOT} && rake test:integration`
+        unless pass?(test_output)
+          print red, bold, "Base #{type} test failed! #{STD_TEST_ERROR}", reset, "\n"
+          return false
+        end
+        print green, bold, "All base integration tests passed!", reset, "\n"
+        true
       end
 
       def gem_builds?

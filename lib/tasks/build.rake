@@ -15,4 +15,8 @@ require "./lib/build_env"
 namespace :build do
   tasks = RubySlippers::BuildEnv::Tasks.new
   tasks.build!
+  
+  task :copy_integration_tests do
+    `cp ./engine/test/integration/* ./base/test/integration && cd ./base && git add .`
+  end
 end

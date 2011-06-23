@@ -34,6 +34,8 @@ module RubySlippers
               bad_return("Engine: Integration tests failed!")
             end
             
+            copy_integration_tests
+            
             unless app_was_deployed?
               bad_return("Could not deploy the app!")
             end
@@ -61,6 +63,14 @@ module RubySlippers
       end
     
     private
+    
+      def copy_integration_tests
+        print yellow, bold, "Updating integration tests", reset, "\n"
+        `cp #{ENGINE_ROOT}/test/integration/* #{BASE_ROOT}/test/integration`
+        `cd #{BASE_ROOT} && git add .`
+        `cd #{BASE_ROOT} && git commit -m 'updated integration tests'`
+        `cd #{BASE_ROOT} && git push`
+      end
     
       %w(build release).each do |type|
         define_method "log_#{type}" do |msg|

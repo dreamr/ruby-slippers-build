@@ -9,7 +9,7 @@ module RubySlippers
     
     ENGINE_ROOT     = File.expand_path("../../engine", __FILE__)
     BASE_ROOT       = File.expand_path("../../base", __FILE__)
-    STD_TEST_ERROR  = "Rerun your test suite before you continue"
+    DEPLOY_ROOT     = File.expand_path("../../deploy", __FILE__)
 
     BUGFIX = 2
     PATCH = 1
@@ -25,10 +25,26 @@ module RubySlippers
         version_types.each_with_index do |type, i|
           desc "Increments version (#{version_egs[i]}), rebuilds the gemspec, then rebuilds the gem (no increment on fail)"
           task "#{type}".to_sym do
-            bad_return("Gem not built!") unless engine_unit_tests_pass?
-            bad_return("Gem not built!") unless engine_integration_tests_pass?
-            bad_return("Gem not built!") unless base_integration_tests_pass?
-            bad_return("Gem not built!") unless gem_builds?
+            
+            unless engine_unit_tests_pass?
+              bad_return("Engine: Unit tests failed!")
+            end
+            
+            unless engine_integration_tests_pass?
+              bad_return("Engine: Integration tests failed!")
+            end
+            
+            unless app_was_deployed?
+              bad_return("Could not deploy the app!")
+            end
+            
+            unless deployed_integration_tests_pass?
+              bad_return("Deployed Integration tests failed!")
+            end
+            
+            unless gem_builds?
+              bad_return("Gem not built!")
+            end
             increment_version(type, File.open(ENGINE_ROOT+"/VERSION").read)
           end
         end
@@ -72,7 +88,7 @@ module RubySlippers
           print yellow, bold, "Running engine #{type} tests...", reset, "\n"
           test_output = `cd #{ENGINE_ROOT} && rake test:#{type}`
           unless pass?(test_output)
-            print red, bold, "Engine #{type} test failed! #{STD_TEST_ERROR}", reset, "\n"
+            print red, bold, "Engine #{type} test failed!", reset, "\n"
             return false
           end
           print green, bold, "All engine #{type} tests passed!", reset, "\n"
@@ -80,11 +96,11 @@ module RubySlippers
         end
       end
       
-      def base_integration_tests_pass?
-        print yellow, bold, "Running base integration tests...", reset, "\n"
-        test_output = `cd #{BASE_ROOT} && rake test:integration`
+      def deployed_integration_tests_pass?
+        print yellow, bold, "Running deployed integration tests...", reset, "\n"
+        test_output = `cd #{DEPLOY_ROOT}/slippers_test && rake test:integration`
         unless pass?(test_output)
-          print red, bold, "Base #{type} test failed! #{STD_TEST_ERROR}", reset, "\n"
+          print red, bold, "Base #{type} test failed!", reset, "\n"
           return false
         end
         print green, bold, "All base integration tests passed!", reset, "\n"
@@ -159,6 +175,24 @@ module RubySlippers
       
       def timestamp
         lambda {|now| now.strftime("on %m/%d/%Y at %H:%m") }.call(DateTime.now)
+      end
+      
+      def app_was_deployed?
+        print yellow, bold, "Deploying app with newly built gem...", reset, "\n"
+        begin
+          `rm -rf #{DEPLOY_ROOT}/slippers_test`
+          `git clone https://github.com/dreamr/ruby-slippers.git #{DEPLOY_ROOT}/slippers_test`
+          gem="#{ENGINE_ROOT}/pkg/ruby-slippers-#{build_version.join('.')}.gem"
+          text = File.read("#{DEPLOY_ROOT}/slippers_test/Gemfile")
+          text.gsub!(/gem 'ruby-slippers'/, "gem 'ruby-slippers', :path => '#{gem}'")
+          File.open("#{DEPLOY_ROOT}/slippers_test/Gemfile", "w") do |f|
+            f.write text
+          end
+        rescue
+          print red, bold, "Deployment failed!", reset, "\n"
+        end
+        print green, bold, "App deployed!", reset, "\n"
+        true
       end
     end
   end  

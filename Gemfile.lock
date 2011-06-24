@@ -1,10 +1,12 @@
 GEM
   remote: http://rubygems.org/
   specs:
+    capture_stdout (0.0.1)
     term-ansicolor (1.0.5)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  capture_stdout
   term-ansicolor

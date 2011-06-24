@@ -1,8 +1,9 @@
 .bundle
 log/*.log
 *.gemspec
-deploy/**
-live/**
-base/**
-engine/**
+deploy
+live
+base
+editor
+engine
 TODO

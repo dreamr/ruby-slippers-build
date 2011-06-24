@@ -1,23 +1,40 @@
 require 'rake'
+require 'rake'
 require 'logger'
 require 'date'
-require 'term/ansicolor'
 require './engine/lib/ext/ext'
+require './lib/ext/silencer'
+require './lib/ext/console_color'
 
 module RubySlippers
   module BuildEnv
+    include ConsoleColor
+    include Silencer
     
+    ROOT            = File.expand_path("../../", __FILE__)
     ENGINE_ROOT     = File.expand_path("../../engine", __FILE__)
     BASE_ROOT       = File.expand_path("../../base", __FILE__)
     DEPLOY_ROOT     = File.expand_path("../../deploy", __FILE__)
+    WIKI_ROOT       = File.expand_path("../../wiki", __FILE__)
 
     BUGFIX = 2
     PATCH = 1
     RELEASE = 0
     
     class Tasks
-      include Term::ANSIColor
       include Rake::DSL
+      
+      %w(wiki engine base).each do |codebase|
+        define_method "push_#{codebase}" do
+          notify "pushing #{codebase} source..."
+          retval = `cd #{RubySlippers::BuildEnv::ROOT}/#{codebase};git push`
+          if retval =~ /Resolving deltas: 100%/
+            gratify "#{codebase} source pushed to remote"
+          else
+            alert "could not push #{codebase} source"
+          end
+        end
+      end
       
       def build!
         version_types = %w(bugfix patch release)

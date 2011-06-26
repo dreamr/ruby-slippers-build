@@ -1,7 +1,23 @@
 TODO
 ====
 
-Implement full stack test/deployment scheme
+Site features
+-------------
+Contact form (email)
+  * reverse captcha
+  * must be free service
+
+
+Blog features
+-----------------------------
+
+* Most popular posts (hits)
+* Most commented posts (comments)
+* Related posts (by tag)
+
+
+
+Full stack test/deployment scheme
 -------------------------------------------
 
 * Engine
@@ -11,3 +27,6 @@ Implement full stack test/deployment scheme
 * Staged (deployed)
   [*] Integration Tests
   [ ] Client Rake Tests
+  
+  
+

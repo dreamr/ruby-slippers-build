@@ -1,3 +1,4 @@
+.DS_Store
 .bundle
 log/*.log
 *.gemspec
@@ -6,4 +7,5 @@ live
 base
 editor
 engine
+wiki
 TODO

@@ -51,6 +51,10 @@ module RubySlippers
               bad_return("Engine: Integration tests failed!")
             end
             
+            unless gem_builds?
+              bad_return("Gem not built!")
+            end
+            
             copy_integration_tests
             
             unless app_was_deployed?
@@ -61,9 +65,6 @@ module RubySlippers
               bad_return("Deployed Integration tests failed!")
             end
             
-            unless gem_builds?
-              bad_return("Gem not built!")
-            end
             increment_version(type, File.open(ENGINE_ROOT+"/VERSION").read)
           end
         end
@@ -209,9 +210,9 @@ module RubySlippers
         begin
           `rm -rf #{DEPLOY_ROOT}/slippers_test`
           `git clone https://github.com/dreamr/ruby-slippers.git #{DEPLOY_ROOT}/slippers_test`
-          gem="#{ENGINE_ROOT}/pkg/ruby-slippers-#{build_version.join('.')}.gem"
+          path="#{ENGINE_ROOT}/pkg"
           text = File.read("#{DEPLOY_ROOT}/slippers_test/Gemfile")
-          text.gsub!(/gem 'ruby-slippers'/, "gem 'ruby-slippers', :path => '#{gem}'")
+          text.gsub!(/gem 'ruby_slippers'/, "gem 'ruby-slippers', '#{build_version.join('.')}', :path => '#{path}'")
           File.open("#{DEPLOY_ROOT}/slippers_test/Gemfile", "w") do |f|
             f.write text
           end

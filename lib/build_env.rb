@@ -72,7 +72,7 @@ module RubySlippers
     
       def release!
         bad_return("Must be a new release, gem not released!") unless is_new_release?
-        bad_return("Try a few more bigfixes or a patch, gem not released!") if too_many_releases?
+        # bad_return("Try a few more bigfixes or a patch, gem not released!") if too_many_releases?
         bad_return("The gem could not be published!") unless gem_publishes?
         
         print yellow, bold, "Gem v#{build_version.join(".")} pushed to rubygems.org!", reset, "\n"
@@ -137,7 +137,10 @@ module RubySlippers
       
       def gem_publishes?
         release_output = `cd #{ENGINE_ROOT} && git add . && git commit -m 'releasing new gem' && rake gem:release`
-        return true if release_output =~ /Successfully registered gem/
+        if release_output =~ /Successfully registered gem/
+          `cd #{BASE_ROOT} && git tag v#{build_version.join('.')} && git push --tags`
+          return true 
+        end
         false
       end
 
@@ -164,7 +167,6 @@ module RubySlippers
         when "patch"
           versions[BUGFIX]=0
           versions[PATCH]=versions[PATCH].to_i+1
-          versions[RELEASE]=0
         when "release"
           versions[RELEASE]=versions[RELEASE].to_i+1
           versions[PATCH]=0
@@ -206,13 +208,16 @@ module RubySlippers
       end
       
       def app_was_deployed?
-        print yellow, bold, "Deploying app with newly built gem...", reset, "\n"
+        path="#{ENGINE_ROOT}/pkg"
+        print yellow, bold, 'Installing newly built gem', reset, "\n"
+        `cd #{DEPLOY_ROOT} && gem install #{path}/ruby_slippers-#{build_version.join('.')}.gem`
+        print yellow, bold, "Deploying app", reset, "\n"
         begin
           `rm -rf #{DEPLOY_ROOT}/slippers_test`
           `git clone https://github.com/dreamr/ruby-slippers.git #{DEPLOY_ROOT}/slippers_test`
-          path="#{ENGINE_ROOT}/pkg"
+          
           text = File.read("#{DEPLOY_ROOT}/slippers_test/Gemfile")
-          text.gsub!(/gem 'ruby_slippers'/, "gem 'ruby-slippers', '#{build_version.join('.')}', :path => '#{path}'")
+          text.gsub!(/gem 'ruby_slippers'/, "gem 'ruby_slippers', '#{build_version.join('.')}'")
           File.open("#{DEPLOY_ROOT}/slippers_test/Gemfile", "w") do |f|
             f.write text
           end

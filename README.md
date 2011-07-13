@@ -24,5 +24,8 @@ To start off, in this directory, run:
     
 To run your tests, in this directory, run:
 
+    rake test:unit
+    rake test:integration
     
+## More to come, my girlfriend is 22 today and is rubbing my back, i need to take her for drinks
   

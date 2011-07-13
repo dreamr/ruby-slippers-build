@@ -22,5 +22,15 @@ task :push => :environment do
   push_engine
 end
 
+namespace :test do
+  %w(unit integration).each do |type|
+    desc "Run #{type} tests"
+    task type.to_sym => :environment do
+      tasks = RubySlippers::BuildEnv::Tasks.new
+      tasks.send "run_#{type}_tests".to_sym
+    end
+  end
+end
+
 task :build => 'build:bugfix'
 task :default => :build

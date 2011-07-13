@@ -4,7 +4,7 @@ module ConsoleColor
   include Term::ANSIColor
   
   def puts(msg, color=nil, style=nil)
-    return print(color msg, reset, "\n") if color.nil? && style.nil?
+    return print(color, msg, reset, "\n") if color.nil? && style.nil?
     print color, style, msg, reset, "\n"
   end
   

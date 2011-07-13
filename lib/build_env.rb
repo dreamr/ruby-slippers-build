@@ -11,6 +11,7 @@ module RubySlippers
     include ConsoleColor
     include Silencer
     
+    REPOSITORY      = 
     ROOT            = File.expand_path("../../", __FILE__)
     ENGINE_ROOT     = File.expand_path("../../engine", __FILE__)
     BASE_ROOT       = File.expand_path("../../base", __FILE__)
@@ -82,6 +83,16 @@ module RubySlippers
         print yellow, bold, "Gem v#{build_version.join(".")} pushed to rubygems.org!", reset, "\n"
         
         log_release("Last released v#{build_version.join(".")} #{timestamp}")
+      end
+      
+      %w(unit integration).each do |type|
+        define_method "run_#{type}_tests" do
+          output = `cd #{ENGINE_ROOT} && rake`
+          puts output
+          unless pass?(output)
+            bad_return("Engine: #{type} tests failed!")
+          end
+        end
       end
     
     private
@@ -229,7 +240,7 @@ module RubySlippers
         print yellow, bold, "Deploying app", reset, "\n"
         begin
           `rm -rf #{DEPLOY_ROOT}/slippers_test`
-          `git clone https://github.com/dreamr/ruby-slippers.git #{DEPLOY_ROOT}/slippers_test`
+          `git clone #{REPOSITORY}.git #{DEPLOY_ROOT}/slippers_test`
           text = File.read("#{DEPLOY_ROOT}/slippers_test/Gemfile")
           text.gsub!(/gem 'ruby_slippers', '[0-9+]\.[0-9+]\.[0-9+]'/, "gem 'ruby_slippers', '#{build_version.join('.')}'")
           File.open("#{DEPLOY_ROOT}/slippers_test/Gemfile", "w") do |f|

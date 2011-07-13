@@ -66,6 +66,10 @@ module RubySlippers
             end
             
             increment_version(type, File.open(ENGINE_ROOT+"/VERSION").read)
+            
+            unless slaps_version_on_base_gemfile?
+              bad_return("Could not edit base Gemfile for versioning!")
+            end
           end
         end
       end
@@ -98,7 +102,7 @@ module RubySlippers
 
       def bad_return(msg)
         print red, bold, msg, reset, "\n"
-        exit
+        exit -1
       end
 
       def release_version
@@ -142,6 +146,12 @@ module RubySlippers
           return true 
         end
         false
+      end
+      
+      def slaps_version_on_base_gemfile?
+        gsub_file "#{BASE_ROOT}/Gemfile", /gem 'ruby_slippers', '[0-9]+\.[0-9]+\.[0-9]+'/, "gem 'ruby_slippers', '#{build_version.join('.')}'"
+        text = File.read("#{BASE_ROOT}/Gemfile")
+        text =~ /gem 'ruby_slippers', '#{build_version.join('.')}'/
       end
 
       def gem_builds?
@@ -207,6 +217,11 @@ module RubySlippers
         lambda {|now| now.strftime("on %m/%d/%Y at %H:%m") }.call(DateTime.now)
       end
       
+      def gsub_file(path, regexp, *args, &block)
+        content = File.read(path).gsub(regexp, *args, &block)
+        File.open(path, 'wb') { |file| file.write(content) }
+      end
+      
       def app_was_deployed?
         path="#{ENGINE_ROOT}/pkg"
         print yellow, bold, 'Installing newly built gem', reset, "\n"
@@ -215,9 +230,8 @@ module RubySlippers
         begin
           `rm -rf #{DEPLOY_ROOT}/slippers_test`
           `git clone https://github.com/dreamr/ruby-slippers.git #{DEPLOY_ROOT}/slippers_test`
-          
           text = File.read("#{DEPLOY_ROOT}/slippers_test/Gemfile")
-          text.gsub!(/gem 'ruby_slippers'/, "gem 'ruby_slippers', '#{build_version.join('.')}'")
+          text.gsub!(/gem 'ruby_slippers', '[0-9+]\.[0-9+]\.[0-9+]'/, "gem 'ruby_slippers', '#{build_version.join('.')}'")
           File.open("#{DEPLOY_ROOT}/slippers_test/Gemfile", "w") do |f|
             f.write text
           end
